@@ -162,19 +162,13 @@
       const statusText = document.getElementById("statusText");
       const frame = document.getElementById("gameFrame");
 
-      frame.addEventListener("load", () => {
-        statusText.textContent = "Ready";
-        setTimeout(() => loadingBlock.classList.add("hidden"), 300);
-      });
-
-      // Safety net: if the load event never fires cleanly (some iframes
-      // don't report it reliably), stop showing the overlay after a bit.
+      // The iframe starts loading immediately (see src above), but we keep
+      // it hidden behind the overlay and reveal on a fixed 10s timer rather
+      // than the load event, so it always feels like a deliberate reveal.
       setTimeout(() => {
-        if (!loadingBlock.classList.contains("hidden")) {
-          statusText.textContent = "Ready";
-          loadingBlock.classList.add("hidden");
-        }
-      }, 6000);
+        statusText.textContent = "Ready";
+        loadingBlock.classList.add("hidden");
+      }, 10000);
 
       function toggleFullscreen() {
         const el = document.querySelector(".stage");
