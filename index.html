@@ -212,17 +212,22 @@
 
         try {
           setStatus("Fetching split data…");
+          console.log("[loader] fetching parts:", partUrls);
           const responses = await Promise.all(
             partUrls.map(url => fetch(url))
           );
 
-          if (responses.some(r => !r.ok)) {
+          const bad = responses.find(r => !r.ok);
+          if (bad) {
+            console.error("[loader] part fetch failed:", bad.url, bad.status);
+            setStatus("Failed to fetch game data (HTTP " + bad.status + ")");
             return null;
           }
 
           const parts = await Promise.all(
             responses.map(r => r.arrayBuffer())
           );
+          console.log("[loader] part sizes:", parts.map(p => p.byteLength));
 
           const combinedBlob = new Blob(parts, {
             type: 'application/octet-stream'
@@ -231,6 +236,8 @@
           setStatus("Assets ready");
           return URL.createObjectURL(combinedBlob);
         } catch (error) {
+          console.error("[loader] merge error:", error);
+          setStatus("Error loading assets: " + error.message);
           return null;
         }
       }
@@ -417,19 +424,31 @@
 
         var script = document.createElement("script");
         script.src = loaderUrl;
+        script.onerror = () => {
+          console.error("[loader] failed to load Unity loader script:", loaderUrl);
+          setStatus("Failed to load engine script");
+        };
         script.onload = () => {
           setStatus("Loading engine…");
+          var stallTimer = setTimeout(() => {
+            setStatus("Still compiling… (this step has no progress bar, large builds can take a while)");
+          }, 8000);
+
           createUnityInstance(canvas, config, (progress) => {
             var pct = Math.round(100 * progress);
             progressBarFull.style.width = pct + "%";
             if (progressLabel()) progressLabel().textContent = pct + "%";
-            if (pct < 100) setStatus("Loading game…");
+            if (pct < 100) setStatus("Loading game… (" + pct + "%)");
+            console.log("[loader] unity progress:", pct + "%");
           }).then((unityInstance) => {
+            clearTimeout(stallTimer);
             setStatus("Done");
             loadingBar.style.display = "none";
+            console.log("[loader] unity instance ready");
           }).catch((message) => {
-            setStatus("Failed to load");
-            alert(message);
+            clearTimeout(stallTimer);
+            console.error("[loader] createUnityInstance failed:", message);
+            setStatus("Failed to load: " + message);
           });
         };
         document.body.appendChild(script);
