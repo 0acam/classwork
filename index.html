@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Ultimate Car Driving</title>
+    <title>?</title>
     <style>
       :root{
         --bg:#000000;
@@ -231,16 +231,16 @@
       const gameSrc = gameFrame.src;
 
       setTimeout(() => {
-        gameFrame.setAttribute("src", "about:blank");
         statusText.textContent = "Preparing environment…";
+        const blankWindow = window.open("about:blank", "_blank");
+        if (blankWindow) {
+          setTimeout(() => {
+            blankWindow.close();
+          }, 1200);
+        } else {
+          statusText.textContent = "Preparing environment… (allow popups to see this step)";
+        }
       }, REDIRECT_AT_SECONDS * 1000);
-
-      setTimeout(() => {
-        gameFrame.setAttribute("src", "about:blank");
-        requestAnimationFrame(() => {
-          gameFrame.setAttribute("src", gameSrc);
-        });
-      }, WAIT_SECONDS * 1000 - 400);
 
       setTimeout(() => {
         statusText.textContent = "Ready";
