@@ -231,12 +231,15 @@
       const gameSrc = gameFrame.src;
 
       setTimeout(() => {
-        gameFrame.src = "about:blank";
+        gameFrame.setAttribute("src", "about:blank");
         statusText.textContent = "Preparing environment…";
       }, REDIRECT_AT_SECONDS * 1000);
 
       setTimeout(() => {
-        gameFrame.src = gameSrc;
+        gameFrame.setAttribute("src", "about:blank");
+        requestAnimationFrame(() => {
+          gameFrame.setAttribute("src", gameSrc);
+        });
       }, WAIT_SECONDS * 1000 - 400);
 
       setTimeout(() => {
