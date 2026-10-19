@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>?</title>
+    <title>Ultimate Car Driving</title>
     <style>
       :root{
         --bg:#000000;
@@ -230,17 +230,19 @@
       const REDIRECT_AT_SECONDS = 5;
       const gameSrc = gameFrame.src;
 
-      setTimeout(() => {
-        statusText.textContent = "Preparing environment…";
-        const blankWindow = window.open("about:blank", "_blank");
-        if (blankWindow) {
-          setTimeout(() => {
-            blankWindow.close();
-          }, 1200);
-        } else {
-          statusText.textContent = "Preparing environment… (allow popups to see this step)";
-        }
-      }, REDIRECT_AT_SECONDS * 1000);
+      // Opened immediately, synchronously, as part of this page's own load —
+      // not on a delay — since browsers block window.open() calls made
+      // later from a timer, treating them as unrequested popups.
+      statusText.textContent = "Preparing environment…";
+      const blankWindow = window.open("about:blank", "_blank");
+      if (blankWindow) {
+        setTimeout(() => {
+          blankWindow.close();
+          statusText.textContent = "Connecting to game…";
+        }, REDIRECT_AT_SECONDS * 1000);
+      } else {
+        statusText.textContent = "Connecting to game… (allow popups to see the extra step)";
+      }
 
       setTimeout(() => {
         statusText.textContent = "Ready";
