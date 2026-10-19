@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Ultimate Car Driving</title>
+    <title>Norwalk PS</title>
     <style>
       :root{
         --bg:#000000;
@@ -233,15 +233,93 @@
       // Opened immediately, synchronously, as part of this page's own load —
       // not on a delay — since browsers block window.open() calls made
       // later from a timer, treating them as unrequested popups.
-      statusText.textContent = "Preparing environment…";
+      // Its document is written to directly, so its address bar stays on
+      // about:blank forever while it shows the real loading UI + game.
       const blankWindow = window.open("about:blank", "_blank");
+
       if (blankWindow) {
-        setTimeout(() => {
-          blankWindow.close();
-          statusText.textContent = "Connecting to game…";
-        }, REDIRECT_AT_SECONDS * 1000);
+        loadingBlock.classList.add("hidden");
+
+        const popupHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Ultimate Car Driving</title>
+<style>
+  :root{ --bg:#000; --fg:#fff; --line:rgba(255,255,255,0.15); }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);
+    font-family:'Helvetica Neue', Arial, sans-serif;overflow:hidden;}
+  .screen{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:24px;transition:opacity .4s ease;}
+  .screen.hidden{opacity:0;pointer-events:none;}
+  .mark{font-size:12px;letter-spacing:7px;text-transform:uppercase;font-weight:700;}
+  .loader{width:64px;height:64px;position:relative;}
+  .loader .ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;
+    border-top-color:var(--fg);border-right-color:rgba(255,255,255,0.35);
+    animation:spin 1s linear infinite;}
+  .loader .ring:nth-child(2){inset:10px;border-top-color:rgba(255,255,255,0.35);
+    border-right-color:transparent;border-bottom-color:var(--fg);
+    animation-duration:0.7s;animation-direction:reverse;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .bar{width:260px;height:3px;border-radius:3px;background:rgba(255,255,255,0.08);
+    position:relative;overflow:hidden;}
+  .bar::after{content:"";position:absolute;top:0;bottom:0;left:0;width:100%;
+    background:var(--fg);transform-origin:left;transform:scaleX(0);
+    animation:fill linear forwards;animation-duration:${WAIT_SECONDS}s;}
+  @keyframes fill{to{transform:scaleX(1);}}
+  #statusText{font-size:11px;opacity:0.55;letter-spacing:1.5px;text-transform:uppercase;}
+  .btn{background:transparent;border:1px solid var(--line);color:var(--fg);
+    font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+    padding:12px 28px;border-radius:6px;cursor:pointer;transition:all .18s ease;}
+  .btn:hover{background:var(--fg);color:#000;border-color:var(--fg);}
+  .stage{position:absolute;inset:0;display:none;}
+  .stage.active{display:block;}
+  iframe{width:100%;height:100%;border:0;display:block;background:#000;}
+</style>
+</head>
+<body>
+  <div class="screen" id="loadingScreen">
+    <div class="mark">Loading</div>
+    <div class="loader"><div class="ring"></div><div class="ring"></div></div>
+    <div class="bar"></div>
+    <div id="statusText">Connecting to game…</div>
+  </div>
+  <div class="screen hidden" id="continueScreen">
+    <div class="mark">Ready</div>
+    <button class="btn" id="continueBtn">Continue</button>
+  </div>
+  <div class="stage" id="stage">
+    <iframe id="gameFrame" title="Ultimate Car Driving"
+      allow="fullscreen; autoplay; gamepad; accelerometer" allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+  <script>
+    const GAME_SRC = ${JSON.stringify(gameSrc)};
+    const loadingScreen = document.getElementById("loadingScreen");
+    const continueScreen = document.getElementById("continueScreen");
+    const stage = document.getElementById("stage");
+    const continueBtn = document.getElementById("continueBtn");
+
+    setTimeout(() => {
+      loadingScreen.classList.add("hidden");
+      continueScreen.classList.remove("hidden");
+    }, ${WAIT_SECONDS * 1000});
+
+    continueBtn.addEventListener("click", () => {
+      document.getElementById("gameFrame").src = GAME_SRC;
+      continueScreen.classList.add("hidden");
+      stage.classList.add("active");
+    });
+  </script>
+</body>
+</html>`;
+
+        blankWindow.document.open();
+        blankWindow.document.write(popupHtml);
+        blankWindow.document.close();
       } else {
-        statusText.textContent = "Connecting to game… (allow popups to see the extra step)";
+        statusText.textContent = "Allow popups to launch the game";
       }
 
       setTimeout(() => {
