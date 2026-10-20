@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Norwalk PS</title> 
-<link rel="icon" type="image/png" href="https://myapps.classlink.com/favicon.ico">
+<title>RPL Network</title>
+<link rel="icon" type="image/png" href="">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   :root{
     --bg:#000; --fg:#fff; --dim:rgba(255,255,255,.42); --faint:rgba(255,255,255,.16);
-    --line:rgba(255,255,255,.14);
+    --line:rgba(255,255,255,.14); --accent:#4de8a0;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   html,body{height:100%; width:100%;}
@@ -24,7 +24,6 @@
       max(16px, env(safe-area-inset-left));
   }
 
-  /* faint grid backdrop */
   .grid{
     position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
     background-image:
@@ -33,6 +32,15 @@
     background-size:48px 48px;
     mask-image:radial-gradient(ellipse at center, black 10%, transparent 70%);
   }
+
+  .glow{
+    position:fixed; z-index:0; pointer-events:none;
+    width:60vw; height:60vw; max-width:600px; max-height:600px;
+    left:50%; top:50%; transform:translate(-50%,-50%);
+    background:radial-gradient(circle, rgba(77,232,160,.07), transparent 65%);
+    animation:pulse 5s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:.5;}50%{opacity:1;}}
 
   .corner{
     position:fixed; font-family:'JetBrains Mono',monospace;
@@ -43,10 +51,9 @@
   .corner.tr{top:max(20px, env(safe-area-inset-top)); right:max(20px, env(safe-area-inset-right)); text-align:right;}
   .corner.bl{bottom:max(20px, env(safe-area-inset-bottom)); left:max(20px, env(safe-area-inset-left));}
   .corner.br{bottom:max(20px, env(safe-area-inset-bottom)); right:max(20px, env(safe-area-inset-right)); text-align:right;}
-  .corner .dot{display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--fg); margin-right:6px; animation:blink 1.6s ease-in-out infinite;}
+  .corner .dot{display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-right:6px; animation:blink 1.6s ease-in-out infinite; box-shadow:0 0 6px var(--accent);}
   @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
 
-  /* hide corner telemetry only when the viewport is too cramped for it, not by device type */
   @media (max-width:360px), (max-height:380px){
     .corner{display:none;}
   }
@@ -56,10 +63,11 @@
     width:min(380px, 100%);
     max-height:100%;
     overflow:auto;
-    border:1px solid var(--line); border-radius:10px;
+    border:1px solid var(--line); border-radius:12px;
     padding:clamp(24px, 6vw, 44px) clamp(20px, 5vw, 36px) clamp(20px, 4vw, 32px);
-    background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0));
-    backdrop-filter:blur(6px);
+    background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.01));
+    backdrop-filter:blur(8px);
+    box-shadow:0 20px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.06);
     opacity:0; transform:translateY(10px);
     animation:panelIn .6s ease forwards;
   }
@@ -69,7 +77,8 @@
     display:flex; align-items:center; gap:10px; margin-bottom:clamp(22px, 5vw, 34px);
   }
   .mark .sq{
-    width:10px; height:10px; background:var(--fg); flex-shrink:0;
+    width:10px; height:10px; background:var(--accent); flex-shrink:0;
+    box-shadow:0 0 8px var(--accent);
     animation:rotateSq 2.4s ease-in-out infinite;
   }
   @keyframes rotateSq{0%,100%{transform:rotate(0);}50%{transform:rotate(135deg);}}
@@ -84,22 +93,22 @@
     font-size:clamp(17px, 4.5vw, 22px); font-weight:600; letter-spacing:-.01em;
   }
   .status-row .pct{
-    font-family:'JetBrains Mono',monospace; font-size:clamp(11px, 2.6vw, 13px); color:var(--dim); font-variant-numeric:tabular-nums; flex-shrink:0;
+    font-family:'JetBrains Mono',monospace; font-size:clamp(11px, 2.6vw, 13px); color:var(--accent); font-variant-numeric:tabular-nums; flex-shrink:0;
   }
 
   .progress-track{
     width:100%; height:3px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:14px;
   }
   .progress-bar{
-    height:100%; width:0%; background:var(--fg); border-radius:2px;
-    box-shadow:0 0 10px rgba(255,255,255,.5);
+    height:100%; width:0%; background:linear-gradient(90deg, var(--fg), var(--accent)); border-radius:2px;
+    box-shadow:0 0 12px rgba(77,232,160,.6);
     animation:load 2.1s cubic-bezier(.4,0,.2,1) forwards;
   }
   @keyframes load{0%{width:0;}55%{width:62%;}100%{width:100%;}}
 
   .log{
     font-family:'JetBrains Mono',monospace; font-size:clamp(9px, 2.2vw, 11px); color:var(--faint);
-    min-height:16px; margin-bottom:clamp(18px, 5vw, 30px); line-height:1.6;
+    min-height:16px; margin-bottom:clamp(18px, 5vw, 30px); line-height:1.7;
   }
   .log span{opacity:0; animation:logFade .5s ease forwards;}
   .log span:nth-child(1){animation-delay:.1s;}
@@ -123,15 +132,15 @@
     padding:clamp(10px, 2.6vw, 12px) clamp(18px, 5vw, 24px);
     font-family:'Inter',sans-serif; font-size:clamp(12px, 2.8vw, 13px); font-weight:600;
     letter-spacing:.03em; border-radius:6px; cursor:pointer;
-    transition:transform .18s ease, box-shadow .25s ease, gap .2s ease;
+    transition:transform .18s ease, box-shadow .25s ease, gap .2s ease, background .18s ease;
     touch-action:manipulation;
   }
   .open-btn svg{width:13px; height:13px; flex-shrink:0; transition:transform .2s ease;}
-  .open-btn:hover{ transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,255,255,.18); gap:14px; }
+  .open-btn:hover{ transform:translateY(-2px); box-shadow:0 8px 28px rgba(77,232,160,.35); gap:14px; background:var(--accent); }
   .open-btn:hover svg{ transform:translateX(2px); }
   .open-btn:active{ transform:translateY(0); }
+  .open-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
 
-  /* very short / landscape-phone frames: tighten vertical rhythm */
   @media (max-height:460px){
     .panel{ padding-top:16px; padding-bottom:14px; }
     .mark{ margin-bottom:14px; }
@@ -139,15 +148,22 @@
     .divider{ margin-bottom:14px; }
   }
 
-  /* ultra-narrow embeds (e.g. small iframes) */
   @media (max-width:220px){
     .mark span{ letter-spacing:.15em; }
     .status-row{ flex-direction:column; align-items:flex-start; gap:4px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .panel, .btn-wrap, .log span, .mark .sq, .corner .dot, .glow{
+      animation:none !important; opacity:1 !important; transform:none !important;
+    }
+    .progress-bar{ width:100% !important; }
   }
 </style>
 </head>
 <body>
   <div class="grid"></div>
+  <div class="glow"></div>
   <div class="corner tl"><span class="dot"></span>RPL / SYSTEM</div>
   <div class="corner tr">BUILD 2026.10</div>
   <div class="corner bl">STATUS: ONLINE</div>
@@ -180,7 +196,6 @@
   </div>
 
 <script>
-  // percentage readout synced with progress bar
   const pctEl = document.getElementById('pct');
   const start = performance.now();
   const duration = 2100;
@@ -192,7 +207,6 @@
   }
   requestAnimationFrame(tick);
 
-  // live clock
   function updateClock(){
     const el = document.getElementById('clock');
     const d = new Date();
@@ -202,7 +216,8 @@
   setInterval(updateClock, 1000);
 
   function openSite() {
-    const url = "https://html-online-game.github.io/ultimate-car-driving/";
+    const url = "";
+    if (!url) return;
     const popup = window.open("about:blank", "_blank");
     popup.document.open();
     popup.document.write(`
