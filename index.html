@@ -1,342 +1,228 @@
 <!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Norwalk PS</title>
-    <link rel="icon" type="image/png" href="https://myapps.classlink.com/favicon.ico">
-    <style>
-      :root{
-        --bg:#000000;
-        --bg2:#0a0a0a;
-        --fg:#ffffff;
-        --accent:#ffffff;
-        --accent2:#888888;
-        --line:rgba(255,255,255,0.15);
-        color-scheme: dark;
-      }
-      *{box-sizing:border-box;}
-      html,body{
-        margin:0;
-        padding:0;
-        height:100%;
-        background:var(--bg);
-        color:var(--fg);
-        font-family:'Helvetica Neue', Arial, sans-serif;
-        overflow:hidden;
-      }
-
-      .wrap{
-        position:relative;
-        width:100%;
-        height:100%;
-        display:flex;
-        flex-direction:column;
-        background:var(--bg);
-        padding-top:env(safe-area-inset-top, 0px);
-        padding-bottom:env(safe-area-inset-bottom, 0px);
-      }
-
-      header{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding:16px 22px;
-        border-bottom:1px solid var(--line);
-        flex-shrink:0;
-        background:linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
-        backdrop-filter:blur(6px);
-      }
-      header h1{
-        font-size:13px;
-        font-weight:700;
-        letter-spacing:4px;
-        text-transform:uppercase;
-        margin:0;
-        color:var(--fg);
-      }
-      header .dot{
-        display:inline-block;
-        width:8px;
-        height:8px;
-        border-radius:50%;
-        background:var(--fg);
-        margin-right:10px;
-        vertical-align:middle;
-        box-shadow:0 0 10px rgba(255,255,255,0.8);
-        animation:pulse 1.6s ease-in-out infinite;
-      }
-      @keyframes pulse{
-        0%,100%{opacity:1; transform:scale(1);}
-        50%{opacity:0.5; transform:scale(0.75);}
-      }
-      .btn{
-        background:rgba(255,255,255,0.04);
-        border:1px solid var(--line);
-        color:var(--fg);
-        font-size:11px;
-        font-weight:600;
-        letter-spacing:1.5px;
-        text-transform:uppercase;
-        padding:9px 16px;
-        border-radius:6px;
-        cursor:pointer;
-        transition:all .18s ease;
-      }
-      .btn:hover{
-        background:var(--fg);
-        color:#000;
-        border-color:var(--fg);
-        box-shadow:0 0 18px rgba(255,255,255,0.4);
-        transform:translateY(-1px);
-      }
-
-      .stage{
-        position:relative;
-        flex:1;
-        min-height:0;
-      }
-      iframe{
-        width:100%;
-        height:100%;
-        border:0;
-        display:block;
-        background:#000;
-      }
-
-      #loadingBlock{
-        position:absolute;
-        inset:0;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        justify-content:center;
-        gap:26px;
-        background:var(--bg);
-        z-index:5;
-        transition:opacity .5s ease;
-      }
-      #loadingBlock.hidden{
-        opacity:0;
-        pointer-events:none;
-      }
-      .mark{
-        font-size:12px;
-        letter-spacing:7px;
-        text-transform:uppercase;
-        font-weight:700;
-        color:var(--fg);
-      }
-
-      .loader{
-        width:64px;
-        height:64px;
-        position:relative;
-      }
-      .loader .ring{
-        position:absolute;
-        inset:0;
-        border-radius:50%;
-        border:3px solid transparent;
-        border-top-color:var(--fg);
-        border-right-color:rgba(255,255,255,0.35);
-        animation:spin 1s linear infinite;
-      }
-      .loader .ring:nth-child(2){
-        inset:10px;
-        border-top-color:rgba(255,255,255,0.35);
-        border-right-color:transparent;
-        border-bottom-color:var(--fg);
-        animation-duration:0.7s;
-        animation-direction:reverse;
-      }
-      @keyframes spin{
-        to{transform:rotate(360deg);}
-      }
-
-      .bar{
-        width:260px;
-        height:3px;
-        border-radius:3px;
-        background:rgba(255,255,255,0.08);
-        position:relative;
-        overflow:hidden;
-      }
-      .bar::after{
-        content:"";
-        position:absolute;
-        top:0; bottom:0; left:0;
-        width:100%;
-        background:var(--fg);
-        transform-origin:left;
-        transform:scaleX(0);
-        animation:fill linear forwards;
-        animation-duration:var(--wait-seconds, 12.5s);
-      }
-      @keyframes fill{
-        to{transform:scaleX(1);}
-      }
-
-      #statusText{
-        font-size:11px;
-        opacity:0.55;
-        letter-spacing:1.5px;
-        text-transform:uppercase;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <header>
-        <h1><span class="dot"></span>Ultimate Car Driving</h1>
-        <button class="btn" onclick="toggleFullscreen()">Fullscreen</button>
-      </header>
-
-      <div class="stage">
-        <div id="loadingBlock">
-          <div class="mark">Loading</div>
-          <div class="loader">
-            <div class="ring"></div>
-            <div class="ring"></div>
-          </div>
-          <div class="bar"></div>
-          <div id="statusText">Connecting to game…</div>
-        </div>
-        <iframe
-          id="gameFrame"
-          src="https://html-online-game.github.io/ultimate-car-driving/"
-          title="Ultimate Car Driving"
-          allow="fullscreen; autoplay; gamepad; accelerometer"
-          allowfullscreen
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
-    </div>
-
-    <script>
-      // ============================================
-      // Adjust the loading wait time here (in seconds)
-      const WAIT_SECONDS = 12.5;
-      // ============================================
-
-      document.documentElement.style.setProperty('--wait-seconds', WAIT_SECONDS + 's');
-
-      const loadingBlock = document.getElementById("loadingBlock");
-      const statusText = document.getElementById("statusText");
-      const gameFrame = document.getElementById("gameFrame");
-
-      // 5 seconds into loading, the iframe is pointed at about:blank
-      // as a step in the loading sequence, then swapped back to the
-      // game right before the loading screen lifts.
-      const REDIRECT_AT_SECONDS = 5;
-      const gameSrc = gameFrame.src;
-
-      // Opened immediately, synchronously, as part of this page's own load —
-      // not on a delay — since browsers block window.open() calls made
-      // later from a timer, treating them as unrequested popups.
-      // Its document is written to directly, so its address bar stays on
-      // about:blank forever while it shows the real loading UI + game.
-      const blankWindow = window.open("about:blank", "_blank");
-
-      if (blankWindow) {
-        loadingBlock.classList.add("hidden");
-
-        const popupHtml = `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Ultimate Car Driving</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Norwalk PS</title> 
+<link rel="icon" type="image/png" href="https://myapps.classlink.com/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
-  :root{ --bg:#000; --fg:#fff; --line:rgba(255,255,255,0.15); }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--fg);
-    font-family:'Helvetica Neue', Arial, sans-serif;overflow:hidden;}
-  .screen{position:absolute;inset:0;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:24px;transition:opacity .4s ease;}
-  .screen.hidden{opacity:0;pointer-events:none;}
-  .mark{font-size:12px;letter-spacing:7px;text-transform:uppercase;font-weight:700;}
-  .loader{width:64px;height:64px;position:relative;}
-  .loader .ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;
-    border-top-color:var(--fg);border-right-color:rgba(255,255,255,0.35);
-    animation:spin 1s linear infinite;}
-  .loader .ring:nth-child(2){inset:10px;border-top-color:rgba(255,255,255,0.35);
-    border-right-color:transparent;border-bottom-color:var(--fg);
-    animation-duration:0.7s;animation-direction:reverse;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .bar{width:260px;height:3px;border-radius:3px;background:rgba(255,255,255,0.08);
-    position:relative;overflow:hidden;}
-  .bar::after{content:"";position:absolute;top:0;bottom:0;left:0;width:100%;
-    background:var(--fg);transform-origin:left;transform:scaleX(0);
-    animation:fill linear forwards;animation-duration:${WAIT_SECONDS}s;}
-  @keyframes fill{to{transform:scaleX(1);}}
-  #statusText{font-size:11px;opacity:0.55;letter-spacing:1.5px;text-transform:uppercase;}
-  .btn{background:transparent;border:1px solid var(--line);color:var(--fg);
-    font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
-    padding:12px 28px;border-radius:6px;cursor:pointer;transition:all .18s ease;}
-  .btn:hover{background:var(--fg);color:#000;border-color:var(--fg);}
-  .stage{position:absolute;inset:0;display:none;}
-  .stage.active{display:block;}
-  iframe{width:100%;height:100%;border:0;display:block;background:#000;}
+  :root{
+    --bg:#000; --fg:#fff; --dim:rgba(255,255,255,.42); --faint:rgba(255,255,255,.16);
+    --line:rgba(255,255,255,.14);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%; width:100%;}
+  body{
+    background:var(--bg); color:var(--fg); font-family:'Inter',sans-serif;
+    display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;
+    min-height:100svh; min-height:100dvh;
+    padding:
+      max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  /* faint grid backdrop */
+  .grid{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size:48px 48px;
+    mask-image:radial-gradient(ellipse at center, black 10%, transparent 70%);
+  }
+
+  .corner{
+    position:fixed; font-family:'JetBrains Mono',monospace;
+    font-size:clamp(8px, 1.6vw, 10px); letter-spacing:.1em; color:var(--faint); z-index:2;
+    white-space:nowrap;
+  }
+  .corner.tl{top:max(20px, env(safe-area-inset-top)); left:max(20px, env(safe-area-inset-left));}
+  .corner.tr{top:max(20px, env(safe-area-inset-top)); right:max(20px, env(safe-area-inset-right)); text-align:right;}
+  .corner.bl{bottom:max(20px, env(safe-area-inset-bottom)); left:max(20px, env(safe-area-inset-left));}
+  .corner.br{bottom:max(20px, env(safe-area-inset-bottom)); right:max(20px, env(safe-area-inset-right)); text-align:right;}
+  .corner .dot{display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--fg); margin-right:6px; animation:blink 1.6s ease-in-out infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  /* hide corner telemetry only when the viewport is too cramped for it, not by device type */
+  @media (max-width:360px), (max-height:380px){
+    .corner{display:none;}
+  }
+
+  .panel{
+    position:relative; z-index:1;
+    width:min(380px, 100%);
+    max-height:100%;
+    overflow:auto;
+    border:1px solid var(--line); border-radius:10px;
+    padding:clamp(24px, 6vw, 44px) clamp(20px, 5vw, 36px) clamp(20px, 4vw, 32px);
+    background:linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,0));
+    backdrop-filter:blur(6px);
+    opacity:0; transform:translateY(10px);
+    animation:panelIn .6s ease forwards;
+  }
+  @keyframes panelIn{to{opacity:1;transform:translateY(0);}}
+
+  .mark{
+    display:flex; align-items:center; gap:10px; margin-bottom:clamp(22px, 5vw, 34px);
+  }
+  .mark .sq{
+    width:10px; height:10px; background:var(--fg); flex-shrink:0;
+    animation:rotateSq 2.4s ease-in-out infinite;
+  }
+  @keyframes rotateSq{0%,100%{transform:rotate(0);}50%{transform:rotate(135deg);}}
+  .mark span{
+    font-family:'JetBrains Mono',monospace; font-size:clamp(9px, 2.2vw, 11px); letter-spacing:.3em; text-transform:uppercase; color:var(--dim);
+  }
+
+  .status-row{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:18px;
+  }
+  .status-row h1{
+    font-size:clamp(17px, 4.5vw, 22px); font-weight:600; letter-spacing:-.01em;
+  }
+  .status-row .pct{
+    font-family:'JetBrains Mono',monospace; font-size:clamp(11px, 2.6vw, 13px); color:var(--dim); font-variant-numeric:tabular-nums; flex-shrink:0;
+  }
+
+  .progress-track{
+    width:100%; height:3px; background:var(--line); border-radius:2px; overflow:hidden; margin-bottom:14px;
+  }
+  .progress-bar{
+    height:100%; width:0%; background:var(--fg); border-radius:2px;
+    box-shadow:0 0 10px rgba(255,255,255,.5);
+    animation:load 2.1s cubic-bezier(.4,0,.2,1) forwards;
+  }
+  @keyframes load{0%{width:0;}55%{width:62%;}100%{width:100%;}}
+
+  .log{
+    font-family:'JetBrains Mono',monospace; font-size:clamp(9px, 2.2vw, 11px); color:var(--faint);
+    min-height:16px; margin-bottom:clamp(18px, 5vw, 30px); line-height:1.6;
+  }
+  .log span{opacity:0; animation:logFade .5s ease forwards;}
+  .log span:nth-child(1){animation-delay:.1s;}
+  .log span:nth-child(2){animation-delay:.9s;}
+  .log span:nth-child(3){animation-delay:1.6s;}
+  @keyframes logFade{to{opacity:1;}}
+  .log span::before{content:'> '; color:var(--dim);}
+
+  .divider{height:1px; background:var(--line); margin-bottom:clamp(16px, 4vw, 24px);}
+
+  .btn-wrap{
+    display:flex; justify-content:flex-end;
+    opacity:0; transform:translateY(6px);
+    animation:reveal .45s ease 2.15s forwards;
+  }
+  @keyframes reveal{to{opacity:1;transform:translateY(0);}}
+
+  .open-btn{
+    display:inline-flex; align-items:center; gap:10px;
+    background:var(--fg); color:#000; border:none;
+    padding:clamp(10px, 2.6vw, 12px) clamp(18px, 5vw, 24px);
+    font-family:'Inter',sans-serif; font-size:clamp(12px, 2.8vw, 13px); font-weight:600;
+    letter-spacing:.03em; border-radius:6px; cursor:pointer;
+    transition:transform .18s ease, box-shadow .25s ease, gap .2s ease;
+    touch-action:manipulation;
+  }
+  .open-btn svg{width:13px; height:13px; flex-shrink:0; transition:transform .2s ease;}
+  .open-btn:hover{ transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,255,255,.18); gap:14px; }
+  .open-btn:hover svg{ transform:translateX(2px); }
+  .open-btn:active{ transform:translateY(0); }
+
+  /* very short / landscape-phone frames: tighten vertical rhythm */
+  @media (max-height:460px){
+    .panel{ padding-top:16px; padding-bottom:14px; }
+    .mark{ margin-bottom:14px; }
+    .log{ margin-bottom:14px; }
+    .divider{ margin-bottom:14px; }
+  }
+
+  /* ultra-narrow embeds (e.g. small iframes) */
+  @media (max-width:220px){
+    .mark span{ letter-spacing:.15em; }
+    .status-row{ flex-direction:column; align-items:flex-start; gap:4px; }
+  }
 </style>
 </head>
 <body>
-  <div class="screen" id="loadingScreen">
-    <div class="mark">Loading</div>
-    <div class="loader"><div class="ring"></div><div class="ring"></div></div>
-    <div class="bar"></div>
-    <div id="statusText">Connecting to game…</div>
-  </div>
-  <div class="screen hidden" id="continueScreen">
-    <div class="mark">Ready</div>
-    <button class="btn" id="continueBtn">Continue</button>
-  </div>
-  <div class="stage" id="stage">
-    <iframe id="gameFrame" title="Ultimate Car Driving"
-      allow="fullscreen; autoplay; gamepad; accelerometer" allowfullscreen
-      referrerpolicy="no-referrer-when-downgrade"></iframe>
-  </div>
-  <script>
-    const GAME_SRC = ${JSON.stringify(gameSrc)};
-    const loadingScreen = document.getElementById("loadingScreen");
-    const continueScreen = document.getElementById("continueScreen");
-    const stage = document.getElementById("stage");
-    const continueBtn = document.getElementById("continueBtn");
+  <div class="grid"></div>
+  <div class="corner tl"><span class="dot"></span>RPL / SYSTEM</div>
+  <div class="corner tr">BUILD 2026.10</div>
+  <div class="corner bl">STATUS: ONLINE</div>
+  <div class="corner br" id="clock">--:--:--</div>
 
-    setTimeout(() => {
-      loadingScreen.classList.add("hidden");
-      continueScreen.classList.remove("hidden");
-    }, ${WAIT_SECONDS * 1000});
+  <div class="panel">
+    <div class="mark"><div class="sq"></div><span>RPL Network</span></div>
 
-    continueBtn.addEventListener("click", () => {
-      document.getElementById("gameFrame").src = GAME_SRC;
-      continueScreen.classList.add("hidden");
-      stage.classList.add("active");
-    });
-  </script>
+    <div class="status-row">
+      <h1>Preparing session</h1>
+      <span class="pct" id="pct">0%</span>
+    </div>
+
+    <div class="progress-track"><div class="progress-bar"></div></div>
+
+    <div class="log">
+      <span>Resolving environment</span><br>
+      <span>Syncing league data</span><br>
+      <span>Ready</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="btn-wrap">
+      <button class="open-btn" onclick="openSite()">
+        Enter
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </div>
+  </div>
+
+<script>
+  // percentage readout synced with progress bar
+  const pctEl = document.getElementById('pct');
+  const start = performance.now();
+  const duration = 2100;
+  function tick(now){
+    const t = Math.min(1, (now - start) / duration);
+    const eased = t < 0.55 ? (t/0.55)*62 : 62 + ((t-0.55)/0.45)*38;
+    pctEl.textContent = Math.round(Math.min(100, eased)) + '%';
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // live clock
+  function updateClock(){
+    const el = document.getElementById('clock');
+    const d = new Date();
+    el.textContent = d.toTimeString().slice(0,8);
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  function openSite() {
+    const url = "https://html-online-game.github.io/ultimate-car-driving/";
+    const popup = window.open("about:blank", "_blank");
+    popup.document.open();
+    popup.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Home</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            html, body { width: 100%; height: 100%; overflow: hidden; }
+            iframe { width: 100vw; height: 100vh; border: none; display: block; }
+          </style>
+        </head>
+        <body>
+          <iframe src="${url}" allowfullscreen></iframe>
+        </body>
+      </html>
+    `);
+    popup.document.close();
+  }
+</script>
 </body>
-</html>`;
-
-        blankWindow.document.open();
-        blankWindow.document.write(popupHtml);
-        blankWindow.document.close();
-      } else {
-        statusText.textContent = "Allow popups to launch the game";
-      }
-
-      setTimeout(() => {
-        statusText.textContent = "Ready";
-        loadingBlock.classList.add("hidden");
-      }, WAIT_SECONDS * 1000);
-
-      function toggleFullscreen() {
-        const el = document.querySelector(".stage");
-        const isFull = document.fullscreenElement || document.webkitFullscreenElement;
-        if (!isFull) {
-          (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
-        } else {
-          (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
-        }
-      }
-    </script>
-  </body>
 </html>
